@@ -1,0 +1,45 @@
+﻿@page
+@model ExemploWebSocketCSharp.Pages.IndexModel
+@{
+}
+
+<h1>ExemploWebSocketCSharp</h1>
+
+
+<script>
+    var scheme = document.location.protocol === "https:" ? "wss" : "ws";
+    var port = document.location.port ? (":" + document.location.port) : "";
+    var url = scheme + "://" + document.location.hostname + port + "/ws";
+
+    var socket = new WebSocket(url);
+
+    socket.onopen = function (event) {
+        console.log("onopen...", event);
+    };
+    
+    socket.onclose = function (event) {
+        console.log("onclose...", event);
+    };
+
+    socket.onerror = function (event) {
+        console.log("onerror...", event);
+    };
+
+    socket.onmessage = function (event) {
+        console.log("onmessage...", event);
+    };
+
+
+
+    setInterval(function () {
+        if (socket.readyState == WebSocket.OPEN)
+            socket.send("mensagem...");
+    }, 5000);
+
+    setTimeout(function () {
+        socket.close(1000, "close");
+    }, 60000);
+
+
+
+</script>
