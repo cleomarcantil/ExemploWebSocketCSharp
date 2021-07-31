@@ -5,6 +5,15 @@
 
 <h1>ExemploWebSocketCSharp</h1>
 
+<p>
+    <input id="inputMessage" />
+    <button id="sendButton">Enviar</button>
+</p>
+<div id="mensagens">
+    <h4>
+        Histórico de mensagens:
+    </h4>
+</div>
 
 <script>
     var scheme = document.location.protocol === "https:" ? "wss" : "ws";
@@ -27,19 +36,19 @@
 
     socket.onmessage = function (event) {
         console.log("onmessage...", event);
+        mensagens.innerHTML += '<p>' + event.data + '</p>';
     };
 
 
+    var inputMessage = document.getElementById("inputMessage");
+    var sendButton = document.getElementById("sendButton");
 
-    setInterval(function () {
-        if (socket.readyState == WebSocket.OPEN)
-            socket.send("mensagem...");
-    }, 5000);
-
-    setTimeout(function () {
-        socket.close(1000, "close");
-    }, 60000);
-
-
+    sendButton.onclick = function () {
+        if (!socket || socket.readyState !== WebSocket.OPEN) {
+            alert("Não conectado!");
+            return;
+        }
+        socket.send(inputMessage.value);
+    };
 
 </script>
