@@ -39,26 +39,32 @@ namespace HelpersExtensions.WebSocketConnection
 
 		public async Task SendTo(string msg, IEnumerable<string> clientIds)
 		{
-			foreach (var clientId in clients.Keys.Intersect(clientIds))
+			var clients = this.clients.Keys.Intersect(clientIds);
+
+			await Parallel.ForEachAsync(clients, async (clientId, cts) =>
 			{
 				await SendTo(msg, clientId);
-			}
+			});
 		}
 
 		public async Task SendToAll(string msg)
 		{
-			foreach (var clientId in clients.Keys)
+			var clients = this.clients.Keys;
+
+			await Parallel.ForEachAsync(clients, async (clientId, cts) =>
 			{
 				await SendTo(msg, clientId);
-			}
+			});
 		}
 
 		public async Task SendToAllExcept(string msg, IEnumerable<string> exceptClientIds)
 		{
-			foreach (var clientId in clients.Keys.Except(exceptClientIds))
+			var clients = this.clients.Keys.Except(exceptClientIds);
+
+			await Parallel.ForEachAsync(clients, async (clientId, cts) =>
 			{
 				await SendTo(msg, clientId);
-			}
+			});
 		}
 
 
