@@ -55,6 +55,9 @@ namespace ExemploWebSocketCSharp
 				endpoints.MapRazorPages();
 			});
 
+			app.UseDefaultFiles(new DefaultFilesOptions { DefaultFileNames = new[] { "index.html" } });
+			app.UseStaticFiles();
+
 			app.UseWebSocketWithConnectionManager("/ws", new WebSocketOptions { KeepAliveInterval = TimeSpan.FromSeconds(120) });
 
 		}

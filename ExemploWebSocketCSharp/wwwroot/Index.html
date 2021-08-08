@@ -1,0 +1,50 @@
+﻿<h1>ExemploWebSocketCSharp</h1>
+
+<p>
+    <input id="inputMessage" disabled />
+    <button id="sendButton" disabled>Enviar</button>
+</p>
+<div id="mensagens">
+    <h4>
+        Histórico de mensagens:
+    </h4>
+</div>
+
+
+<script src="js/ws.js"></script>
+<script>
+    var scheme = document.location.protocol === "https:" ? "wss" : "ws";
+    var port = document.location.port ? (":" + document.location.port) : "";
+    var url = scheme + "://" + document.location.hostname + port + "/ws";
+    
+    var inputMessage = document.getElementById("inputMessage");
+    var sendButton = document.getElementById("sendButton");
+    var mensagens = document.getElementById("mensagens");
+
+
+    startWebSocket(url, {
+        onConnected: function (event, socket) {
+            console.log("conectado...", event);
+            inputMessage.disabled = false;
+            sendButton.disabled = false;
+            sendButton.onclick = () => socket.send(inputMessage.value);
+        },
+        onDisconnected: function (event) {
+            console.log("disconectado...", event);
+            inputMessage.disabled = true;
+            sendButton.disabled = true;
+        },
+        onReconnected: function (event) {
+            console.log("reconectado...", event);
+        },
+        onMessage: function (event) {
+            console.log("mensagem...", event);
+            mensagens.innerHTML += '<p>' + event.data + '</p>';
+           },
+        onError: function (event) {
+            console.log("erro...", event);
+        },
+    });
+
+
+</script>
