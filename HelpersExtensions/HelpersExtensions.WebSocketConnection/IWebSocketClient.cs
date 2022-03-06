@@ -1,20 +1,24 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace HelpersExtensions.WebSocketConnection
 {
-	public interface IWebSocketClient
+	public interface IWebSocketClient<TWSEvents>
+		where TWSEvents : WebSocketEvents
 	{
-		Task SendTo(string msg, string clientId);
+		Task SendTo(string message, string clientId, CancellationToken cancellationToken);
+		
+		Task SendTo(string message, IEnumerable<string> clientIds, CancellationToken cancellationToken);
 
-		Task SendTo(string msg, IEnumerable<string> clientIds);
+		Task SendToAll(string message, CancellationToken cancellationToken);
 
-		Task SendToAll(string msg);
-
-		Task SendToAllExcept(string msg, IEnumerable<string> exceptClientIds);
+		Task SendToAllExcept(string message, IEnumerable<string> exceptClientIds, CancellationToken cancellationToken);
 
 		IEnumerable<string> GetClients();
 
 		int Count {  get; }
+
+		TWSEvents GetWSEvents();
 	}
 }

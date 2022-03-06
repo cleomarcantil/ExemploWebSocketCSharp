@@ -8,16 +8,17 @@ using System.Threading.Tasks;
 
 namespace HelpersExtensions.WebSocketConnection
 {
-	static class WebSocketEcho
+	static class WebSocketEcho<TWSEvents>
+		where TWSEvents : WebSocketEvents
 	{
-		public static async Task Invoke(HttpContext context, WebSocket webSocket)
+		public static async Task Invoke(HttpContext context, WebSocket webSocket, CancellationToken cancellationToken)
 		{
-			var webSocketConnectionManager = (WebSocketConnectionManager)context.RequestServices.GetRequiredService<IWebSocketClient>();
-			var webSocketServerEvents = context.RequestServices.GetRequiredService<IWebSocketServerEvents>();
+			var wsEvents = context.RequestServices.GetRequiredService<TWSEvents>();
+			var wsClient = (WebSocketClient<TWSEvents>)context.RequestServices.GetRequiredService<IWebSocketClient<TWSEvents>>();
 
 			var clientId = Guid.NewGuid().ToString();
-			webSocketConnectionManager.Add(clientId, webSocket);
-			await webSocketServerEvents.OnClientConnected(clientId);
+			wsClient.Connections.Add(clientId, webSocket);
+			await wsEvents.OnClientConnected(clientId, cancellationToken);
 
 			var buffer = new byte[1024 * 4];
 			var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
@@ -25,15 +26,14 @@ namespace HelpersExtensions.WebSocketConnection
 			while (!result.CloseStatus.HasValue)
 			{
 				var mensagemRecebida = Encoding.UTF8.GetString(buffer, 0, result.Count);
-				await webSocketServerEvents.OnReceiveMessage(mensagemRecebida, clientId);
+				await wsEvents.OnReceive(mensagemRecebida, clientId, cancellationToken);
 
 				result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
 			}
 
 			await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
-			webSocketConnectionManager.Remove(clientId);
-			await webSocketServerEvents.OnClientDisconnected(clientId);
+			wsClient.Connections.Remove(clientId);
+			await wsEvents.OnClientDisconnected(clientId, CancellationToken.None);
 		}
-
 	}
 }

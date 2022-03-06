@@ -1,5 +1,4 @@
-using ExemploWebSocketCSharp.Services;
-using HelpersExtensions.WebSocketConnection;
+using ExemploWebSocketCSharp.WebSockets;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -30,7 +29,8 @@ namespace ExemploWebSocketCSharp
 
 			services.AddRazorPages();
 
-			services.AddWebSocketConnectionManager<WebSocketServerEventsService>();
+			services.AddWebSocketEventsService<ClockWSEvents>();
+			services.AddWebSocketEventsService<ChatWSEvents>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -58,7 +58,8 @@ namespace ExemploWebSocketCSharp
 			app.UseDefaultFiles(new DefaultFilesOptions { DefaultFileNames = new[] { "index.html" } });
 			app.UseStaticFiles();
 
-			app.UseWebSocketWithConnectionManager("/ws", new WebSocketOptions { KeepAliveInterval = TimeSpan.FromSeconds(120) });
+			app.UseWebSocketWithEventsCallback<ClockWSEvents>("/ws-clock", new WebSocketOptions { KeepAliveInterval = TimeSpan.FromSeconds(120) });
+			app.UseWebSocketWithEventsCallback<ChatWSEvents>("/ws-chat", new WebSocketOptions { KeepAliveInterval = TimeSpan.FromSeconds(120) });
 
 		}
 		

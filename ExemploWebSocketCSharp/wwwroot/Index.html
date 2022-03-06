@@ -1,5 +1,6 @@
 ﻿<h1>ExemploWebSocketCSharp</h1>
 
+<p id="clock"></p>
 <p>
     <input id="inputMessage" disabled />
     <button id="sendButton" disabled>Enviar</button>
@@ -15,22 +16,35 @@
 <script>
     var scheme = document.location.protocol === "https:" ? "wss" : "ws";
     var port = document.location.port ? (":" + document.location.port) : "";
-    var url = scheme + "://" + document.location.hostname + port + "/ws";
+    var urlClock = scheme + "://" + document.location.hostname + port + "/ws-clock";
+    var urlChat = scheme + "://" + document.location.hostname + port + "/ws-chat";
     
+	var clock = document.getElementById("clock");
     var inputMessage = document.getElementById("inputMessage");
     var sendButton = document.getElementById("sendButton");
     var mensagens = document.getElementById("mensagens");
 
 
-    startWebSocket(url, {
+    startWebSocket(urlClock, {
+        onMessage: function (event) {
+			clock.innerHTML = event.data;
+           },
+    });
+    
+
+    startWebSocket(urlChat, {
         onConnected: function (event, socket) {
             console.log("conectado...", event);
             inputMessage.disabled = false;
             sendButton.disabled = false;
-            sendButton.onclick = () => socket.send(inputMessage.value);
+            sendButton.onclick = () => {
+                socket.send(inputMessage.value);
+                inputMessage.value = "";
+                inputMessage.focus();
+            };
         },
         onDisconnected: function (event) {
-            console.log("disconectado...", event);
+            console.log("desconectado...", event);
             inputMessage.disabled = true;
             sendButton.disabled = true;
         },
